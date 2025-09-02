@@ -1,9 +1,12 @@
 import React, { useEffect ,useState ,useRef} from 'react'
 import { assets, blogCategories } from '../../assets/assets'
 import Quill from 'quill'
+import { useAppContext } from '../../context/AppContext'
+import {toast} from 'react-hot-toast'
 
 const AddBLog = () => {
 
+  const {axios} = useAppContext()
   const [isAdding, setIsAdding] = useState(false)
   const [loading, setLoading] = useState(false)
   const editorRef = useRef(null)
@@ -18,7 +21,36 @@ const AddBLog = () => {
     
   }
   const onSubmitHandler =async (e) => {
-    e.preventDefault()
+    try {
+      e.preventDefault();
+      setIsAdding(true)
+
+      const blog = {
+        title, subTitle, 
+        description :quillRef.current.root.innerHTML,
+        category, isPublished
+      }
+      
+      const formData = new FormData();
+      console.log('Blog before submit',blog);
+      formData.append('blog',JSON.stringify(blog)) 
+      formData.append('image', image) 
+
+      const {data} = await axios.post('/api/blog/add', formData);
+      if(data.success) {
+         toast.success(data.message);
+         setImage(false)
+         setTitle('')
+         quillRef.current.innerHTML = ''
+         setCategory('Startup')
+      } else {
+        toast.error(error.message)
+      }
+    } catch (error) {
+       toast.error(data.message)
+    } finally {
+      setIsAdding(false)
+    }
   }
   useEffect(()=>{
     //Initialize only once
@@ -60,8 +92,8 @@ const AddBLog = () => {
         <p>Publish Now</p>
         <input type ="checkbox" checked = {isPublished} className='Scale-125 curosr-pointer' onChange={e=> setIspublished(e.target.checked)}/>
        </div>
-       <button type='submit' className='mt-8 w-40 h-10 bg-primary text-white rounded cursor-pointer text-sm'>
-         Add BLog
+       <button disabled={isAdding} type='submit' className='mt-8 w-40 h-10 bg-primary text-white rounded cursor-pointer text-sm'>
+         {isAdding ? 'Adding..' : 'Add Blog'}
        </button>
       </div>
     </form>
