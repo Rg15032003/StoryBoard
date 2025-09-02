@@ -3,6 +3,7 @@ import { assets, blogCategories } from '../../assets/assets'
 import Quill from 'quill'
 import { useAppContext } from '../../context/AppContext'
 import {toast} from 'react-hot-toast'
+import {parse} from 'marked'
 
 const AddBLog = () => {
 
@@ -18,6 +19,23 @@ const AddBLog = () => {
   const [isPublished,setIspublished] = useState(false);
 
   const generateContent=async () => {
+    if(!title) 
+      return toast.error("please enter a title")
+    
+     try {
+      setLoading(true);
+      const {data}=await axios.post('/api/blog/generate',{prompt:title})
+      if(data.success) {
+        quillRef.current.root.innerHTML=parse(data.content)
+      }
+      else {
+        toast.error(data.message)
+      }
+     } catch (error) {
+      toast.error(error.message)
+     } finally {
+      setLoading(false)
+     }
     
   }
   const onSubmitHandler =async (e) => {
@@ -44,10 +62,10 @@ const AddBLog = () => {
          quillRef.current.innerHTML = ''
          setCategory('Startup')
       } else {
-        toast.error(error.message)
+        toast.error(data.message)
       }
     } catch (error) {
-       toast.error(data.message)
+       toast.error(error.message)
     } finally {
       setIsAdding(false)
     }
@@ -79,7 +97,7 @@ const AddBLog = () => {
              <div className='w-8 h-8 rounded-full border-2 border-t-white animate-spin'></div>
           </div>
         )}
-        <button type='button'  disabled={loading} onClick={generateContent} className='absolute bottom-1 right-2 ml-2 text-xs text-white bg-black/70 px-4 py-1.5 rounded hover:underline cursor-pointer'>Generate with AI</button>
+        <button type='button' disabled={loading} onClick={generateContent} className='absolute bottom-1 right-2 ml-2 text-xs text-white bg-black/70 px-4 py-1.5 rounded hover:underline cursor-pointer'>Generate with AI</button>
        </div>
        <p className='mt-4'>Blog Category</p>
        <select onChange={e => setCategory(e.target.value)}name = "category" className='mt-2 px-3 py-2 border text-gray-500 border-gray-300 outline-none rounded'>

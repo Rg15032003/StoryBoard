@@ -1,7 +1,23 @@
 import React, { useRef } from "react";
 import { assets } from "../assets/assets";
+import { useAppContext } from "../context/AppContext";
+
 
 function Header() {
+
+  const {setInput,input}=useAppContext()
+  const inputRef=useRef()
+
+  const onSubmitHandler=async (e)=>{
+    e.preventDefault();
+    setInput(inputRef.current.value)
+
+  }
+
+  const onClear= () => {
+    setInput('')
+    inputRef.current.value=''
+  }
   return (
     <div className="mx-8 sm:mx-16 xl:mx-24 relative">
       <div className="text-center mt-20 mb-8">
@@ -18,8 +34,8 @@ function Header() {
           write without filters.Whether it's one word or a thousand,your story
           starts right here.
         </p>
-        <form className="flex justify-between max-w-lg max-sm:scale-75 mx-auto border border-gray-300 bg-white rounded overflow-hidden">
-          <input
+        <form onSubmit={onSubmitHandler} className="flex justify-between max-w-lg max-sm:scale-75 mx-auto border border-gray-300 bg-white rounded overflow-hidden">
+          <input ref={inputRef}
             type="text"
             placeholder="Search for blogs"
             required
@@ -33,9 +49,9 @@ function Header() {
           </button>
         </form>
       </div>
-      {/* <div className='text-center'>
-        { input && <button onClick={onClear} className='border font-light text-xs py-1 px-3 rounded-sm shadow-custom-sm cursor-pointer'>Clear Search</button>}
-        </div> */}
+      <div className='text-center'>
+        { input && <button onClick={onClear} className='border font-light text-xs py-1 px-3 rounded-sm shadow-custom-sm cursor-pointer'>Clear</button>}
+        </div>
       <img
         src={assets.gradientBackground}
         alt=""
